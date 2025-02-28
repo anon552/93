@@ -1,0 +1,119 @@
+import "./ParseRule.mls"
+import "./Rules.mls"
+import "./Parser.mls"
+import "./Predef.mls"
+import "./Stack.mls"
+import "./Iter.mls"
+import "./Option.mls"
+import "./TreeTracer.mls"
+import "./XML.mls"
+
+open Predef
+open Stack
+open Option
+open ParseRule { ParseRule, Choice }
+open Rules { syntaxKinds }
+open TreeTracer
+open XML { html, tag, elem, style }
+
+class RecursiveKnot(val getName: () -> Str)
+
+class LinkOpts(val href: Str)
+
+module ParseRuleVisualizer with ...
+
+val tracer = new TreeTracer()
+
+let defaultKinds = tuple of "type", "term", "typevar", "ident"
+
+let renderedKinds = new Set of defaultKinds
+
+fun reset() =
+  set renderedKinds = new Set of defaultKinds
+
+// * `rr` is the railroad library.
+fun render(rr, title: Str, rule: ParseRule) =
+  let helperRules = []
+  let referencedKinds = new Set()
+  let renderCache = new globalThis.Map()
+  fun sequence(lhs, rhsOpt) =
+    if rhsOpt is
+      Some(rhs) then rr.Sequence(lhs, rhs)
+      None then lhs
+  fun diagram(choicesOpt) =
+    rr.Diagram of if choicesOpt is Some(choices) then choices else []
+  fun renderChoice(parentRule, choice, currentRule) = if choice is
+    Choice.End then
+      tracer.print of "found Choice.End"
+      None
+    Choice.Keyword(keyword, rest) then
+      tracer.print of "found Choice.Keyword"
+      Some of rr.Terminal(keyword.name) sequence(renderRule(rest, currentRule))
+    Choice.Siding(rule, optional, rest) then
+      tracer.print of "found Choice.Siding"
+      Some of if renderRule(rule, currentRule) is
+        let latterPart = renderRule(rest, currentRule)
+        Some(optionalPart) and
+          optional then rr.Optional(optionalPart) sequence(latterPart)
+          else optionalPart sequence(latterPart)
+        None then latterPart
+    Choice.Ref(kind, _, outerPrec, innerPrec, rest) then
+      tracer.print of "found Choice.Ref to " + kind
+      if renderedKinds.has(kind) is false do
+        referencedKinds.add of kind
+      Some of rr.NonTerminal(kind, LinkOpts("#" + kind))
+        sequence(renderRule(rest, currentRule))
+    Choice.Lazy(get, make) and
+      renderCache.has(make) then
+        tracer.print of "found Choice.Lazy in cache"
+        let ruleName = renderCache.get(make)
+        Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
+      else
+        let rule = get()
+        if rule is RecursiveKnot(getName) then
+          tracer.print of "found RecursiveKnot of \"" + getName() + "\""
+          Some of rr.NonTerminal(getName(), LinkOpts("#" + getName()))
+        else
+          tracer.print of "found Choice.Lazy not in cache"
+          let proxyChoice = null
+          let getProxyChoiceName = () => if Choice.rest(proxyChoice) is
+            Some(rule) then rule.name
+            else "???"
+          set proxyChoice = make(() => RecursiveKnot(getProxyChoiceName))
+          let ruleName = getProxyChoiceName()
+          renderCache.set(make, ruleName)
+          helperRules.push of tuple of
+            ruleName, diagram of renderChoice(parentRule, proxyChoice, None)
+          Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
+    do console.log("unexpected choice: " + choice)
+  fun renderRule(rule: ParseRule, currentRule) = tracer.trace of
+    "renderRule <<< " + rule.name
+    result => "renderRule >>> "
+    () => ...
+    let
+      rest = rule.choices
+      optional = false
+      nodes = []
+    while rest is head :: tail do
+      if renderChoice(rule, head, currentRule) is
+        Some(node) do nodes.push of node
+        None do set optional = true
+      set rest = tail
+    tracer.print of "nodes: ", nodes.length.toString()
+    if
+      nodes.length is 0 then None
+      let choice = rr.Choice(0, ...nodes)
+      optional is true then Some(rr.Optional(choice))
+      else Some(choice)
+  // Iteratively render the rule and its dependencies.
+  let diagrams = [[title, diagram of renderRule(rule, None)]]
+  while referencedKinds.size > 0 do
+    let currentKinds = referencedKinds
+    set renderedKinds = renderedKinds.union of currentKinds
+    referencedKinds = new Set()
+    diagrams.push of ...currentKinds
+      Iter.mapping of kind => 
+        let theRule = syntaxKinds.get(kind) Option.unsafe.get()
+        [kind, diagram of renderRule of theRule]
+      Iter.toArray()
+  diagrams
