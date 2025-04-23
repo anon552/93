@@ -1,14 +1,17 @@
 import runtime from "./Runtime.mjs";
 import Predef from "./Predef.mjs";
 let Option1;
-Option1 = class Option {
+(class Option {
   static {
-    this.Some = function Some(value1) { return new Some.class(value1); };
+    Option1 = Option;
+    this.Some = function Some(value1) {
+      return new Some.class(value1);
+    };
     this.Some.class = class Some {
       constructor(value) {
         this.value = value;
       }
-      toString() { return "Some(" + globalThis.Predef.render(this.value) + ")"; }
+      toString() { return "Some(" + runtime.render(this.value) + ")"; }
     };
     const None$class = class None {
       constructor() {}
@@ -16,16 +19,20 @@ Option1 = class Option {
     };
     this.None = new None$class;
     this.None.class = None$class;
-    this.Both = function Both(fst1, snd1) { return new Both.class(fst1, snd1); };
+    this.Both = function Both(fst1, snd1) {
+      return new Both.class(fst1, snd1);
+    };
     this.Both.class = class Both {
       constructor(fst, snd) {
         this.fst = fst;
         this.snd = snd;
       }
-      toString() { return "Both(" + globalThis.Predef.render(this.fst) + ", " + globalThis.Predef.render(this.snd) + ")"; }
+      toString() { return "Both(" + runtime.render(this.fst) + ", " + runtime.render(this.snd) + ")"; }
     };
-    this.unsafe = class unsafe {
-      static {}
+    (class unsafe {
+      static {
+        Option.unsafe = unsafe;
+      }
       static get(opt) {
         let param0, value;
         if (opt instanceof Option.Some.class) {
@@ -39,7 +46,7 @@ Option1 = class Option {
         }
       }
       static toString() { return "unsafe"; }
-    };
+    });
   }
   static isDefined(x) {
     if (x instanceof Option.Some.class) {
@@ -49,9 +56,6 @@ Option1 = class Option {
     } else {
       throw new globalThis.Error("match error");
     }
-  } 
-  static test() {
-    return Predef.pipeInto(2134, Predef.print)
   } 
   static getOrElse(opt, default1) {
     let param0, value;
@@ -64,7 +68,19 @@ Option1 = class Option {
     } else {
       throw new globalThis.Error("match error");
     }
+  } 
+  static flatMap(opt1, f) {
+    let param0, value;
+    if (opt1 instanceof Option.Some.class) {
+      param0 = opt1.value;
+      value = param0;
+      return runtime.safeCall(f(value))
+    } else if (opt1 instanceof Option.None.class) {
+      return Option.None
+    } else {
+      throw new globalThis.Error("match error");
+    }
   }
   static toString() { return "Option"; }
-};
+});
 let Option = Option1; export default Option;

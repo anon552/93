@@ -8,7 +8,11 @@ open Predef
 
 module Stack[T] with ...
 
-class (::) Cons[A](head: A, tail: Stack[A])
+// See https://github.com/hkust-taco/mlscript/pull/295#discussion_r2029692230
+// TODO support type/module overloading
+type T[A]
+
+data class (::) Cons[A](head: A, tail: T[A])
 object Nil
 
 fun isEmpty(xs) = xs is Nil
@@ -69,8 +73,22 @@ fun (:::) concat(xs, ys) = if
 
 fun (:+) append(xs, y) = xs ::: y :: Nil
 
+fun rev(xs) = if xs is
+  Nil then Nil
+  h :: t then
+    let
+      res = h :: Nil
+      rem = t
+    while rem is h' :: t' do
+      set
+        res = h' :: res
+        rem = t'
+    res
+
 fun filter(xs, f) = if xs is
   head :: tail and
     f(head) then head :: filter(tail, f)
     else filter(tail, f)
   Nil then Nil
+
+

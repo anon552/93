@@ -1,54 +1,54 @@
 import runtime from "./Runtime.mjs";
-import Precedence from "./Precedence.mjs";
+import Keywords from "./Keywords.mjs";
 import Rules from "./Rules.mjs";
 import Token from "./Token.mjs";
 import ParseRule from "./ParseRule.mjs";
-import Keyword from "./Keyword.mjs";
 import Tree from "./Tree.mjs";
 import Stack from "./Stack.mjs";
 import Option from "./Option.mjs";
 import Predef from "./Predef.mjs";
 import Iter from "./Iter.mjs";
 let Extension1;
-Extension1 = class Extension {
+(class Extension {
   static {
+    Extension1 = Extension;
     const OpenCategory$class = class OpenCategory {
       constructor() {}
       unapply(scrut) {
         if (scrut === "term") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "type") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "decl") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
         let cond, sliced, cond1, sliced1, cond2, sliced2;
-        cond = globalThis.Predef.stringStartsWith(topic, "term");
+        cond = runtime.Str.startsWith(topic, "term");
         if (cond === true) {
-          sliced = globalThis.Predef.stringDrop(topic, 4);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          sliced = runtime.Str.drop(topic, 4);
+          return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
-          cond1 = globalThis.Predef.stringStartsWith(topic, "type");
+          cond1 = runtime.Str.startsWith(topic, "type");
           if (cond1 === true) {
-            sliced1 = globalThis.Predef.stringDrop(topic, 4);
-            return runtime.safeCall(globalThis.Predef.MatchResult([
+            sliced1 = runtime.Str.drop(topic, 4);
+            return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
-            cond2 = globalThis.Predef.stringStartsWith(topic, "decl");
+            cond2 = runtime.Str.startsWith(topic, "decl");
             if (cond2 === true) {
-              sliced2 = globalThis.Predef.stringDrop(topic, 4);
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              sliced2 = runtime.Str.drop(topic, 4);
+              return runtime.safeCall(runtime.MatchResult([
                 sliced2
               ]))
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           }
         }
@@ -61,30 +61,30 @@ Extension1 = class Extension {
       constructor() {}
       unapply(scrut) {
         if (scrut === "ident") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "typevar") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
         let cond, sliced, cond1, sliced1;
-        cond = globalThis.Predef.stringStartsWith(topic, "ident");
+        cond = runtime.Str.startsWith(topic, "ident");
         if (cond === true) {
-          sliced = globalThis.Predef.stringDrop(topic, 5);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          sliced = runtime.Str.drop(topic, 5);
+          return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
-          cond1 = globalThis.Predef.stringStartsWith(topic, "typevar");
+          cond1 = runtime.Str.startsWith(topic, "typevar");
           if (cond1 === true) {
-            sliced1 = globalThis.Predef.stringDrop(topic, 7);
-            return runtime.safeCall(globalThis.Predef.MatchResult([
+            sliced1 = runtime.Str.drop(topic, 7);
+            return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       }
@@ -199,7 +199,7 @@ Extension1 = class Extension {
                   leftPrec$_ = tmp;
                   tmp1 = Extension.parsePrecedenceTree(rightPrec);
                   rightPrec$_ = tmp1;
-                  return Precedence.Keywords.keyword(name, leftPrec$_, rightPrec$_)
+                  return Keywords.keyword(name, leftPrec$_, rightPrec$_)
                 } else {
                   tmp2 = "expect a string literal but found " + keyword;
                   return Predef.print(tmp2)
@@ -274,7 +274,7 @@ Extension1 = class Extension {
           param01 = scrut1.value;
           rule = param01;
           matchResult1 = runtime.safeCall(Extension.OpenCategory.unapply(kindName));
-          if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
+          if (matchResult1 instanceof runtime.MatchResult.class) {
             if (choice instanceof ParseRule.Choice.Ref.class) {
               param02 = choice.kind;
               param1 = choice.process;
@@ -290,7 +290,7 @@ Extension1 = class Extension {
               if (scrut2 instanceof Option.Some.class) {
                 param03 = scrut2.value;
                 refRule = param03;
-                tmp = refRule.andThen2(rest, process);
+                tmp = refRule.andThen(rest, process);
                 return runtime.safeCall(rule.extendChoices(tmp.choices))
               } else {
                 tmp1 = "Unknown referenced syntax category: " + refKindName;
@@ -302,7 +302,7 @@ Extension1 = class Extension {
             }
           } else {
             matchResult = runtime.safeCall(Extension.ClosedCategory.unapply(kindName));
-            if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+            if (matchResult instanceof runtime.MatchResult.class) {
               tmp3 = "Cannot extend a closed category: " + kindName;
               return Predef.print(tmp3)
             } else {
@@ -328,9 +328,9 @@ Extension1 = class Extension {
     }
   } 
   static parseChoiceTree(tree4) {
-    let go, param0, param01, param1, categoryIdent, param02, param11, choiceTree, param03, param12, funcIdent, param04, param13, categoryName, op, param05, param14, other, param06, elements, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36;
+    let go, param0, param01, param1, categoryIdent, param02, param11, choiceTree, param03, param12, funcIdent, param04, param13, categoryName, op, param05, param14, other, param06, elements, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, op1;
     go = function go(trees) {
-      let res, param07, param15, param08, param16, name, rest, param09, param17, param010, param18, param011, param19, name1, rest1, scrut, param012, keyword, tmp37, tmp38, tmp39;
+      let res, param07, param15, param08, param16, name, rest, param09, param17, param010, param18, param011, param19, name1, rest1, scrut, param012, keyword, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39;
       if (trees instanceof Stack.Cons.class) {
         param07 = trees.head;
         param15 = trees.tail;
@@ -347,12 +347,13 @@ Extension1 = class Extension {
                 if (param011 instanceof Token.LiteralKind.String.class) {
                   name1 = param19;
                   rest1 = param15;
-                  scrut = runtime.safeCall(Precedence.Keywords.all.get(name1));
+                  scrut = runtime.safeCall(Keywords.all.get(name1));
                   if (scrut instanceof Option.Some.class) {
                     param012 = scrut.value;
                     keyword = param012;
-                    tmp37 = go(rest1);
-                    tmp38 = ParseRule.Choice.keyword(keyword, tmp37);
+                    tmp34 = ParseRule.Choice.keyword(keyword);
+                    tmp35 = go(rest1);
+                    tmp36 = runtime.safeCall(tmp34(tmp35));
                   } else {
                     throw new globalThis.Error("match error");
                   }
@@ -374,10 +375,12 @@ Extension1 = class Extension {
           if (param08 instanceof Token.LiteralKind.String.class) {
             name = param16;
             rest = param15;
-            tmp39 = go(rest);
-            tmp38 = ParseRule.Choice.reference(name, (head, tail) => {
-              return Stack.Cons(head, tail)
-            }, "unnamed", tmp39);
+            tmp37 = ParseRule.Choice.reference(name);
+            tmp38 = go(rest);
+            tmp39 = Predef.tuple(tmp38);
+            tmp36 = runtime.safeCall(tmp37({
+            "process": Stack.Cons, "name": "unnamed", "choices": tmp39
+            }));
           } else {
             throw new globalThis.Error("match error");
           }
@@ -385,11 +388,11 @@ Extension1 = class Extension {
           throw new globalThis.Error("match error");
         }
       } else if (trees instanceof Stack.Nil.class) {
-        tmp38 = ParseRule.Choice.end(Stack.Nil);
+        tmp36 = ParseRule.Choice.end(Stack.Nil);
       } else {
         throw new globalThis.Error("match error");
       }
-      res = tmp38;
+      res = tmp36;
       return res
     };
     if (tree4 instanceof Tree.Tuple.class) {
@@ -413,13 +416,15 @@ Extension1 = class Extension {
                 if (param04 instanceof Token.LiteralKind.String.class) {
                   categoryName = param13;
                   if (funcIdent instanceof Tree.Ident.class) {
-                    op = (trees) => {
-                      let tmp37;
-                      tmp37 = Iter.fromStack(trees);
-                      return Iter.folded(tmp37, funcIdent, (f, x) => {
+                    op1 = function op(trees) {
+                      let tmp34, lambda;
+                      tmp34 = Iter.fromStack(trees);
+                      lambda = (undefined, function (f, x) {
                         return Tree.App(f, x)
-                      })
+                      });
+                      return Iter.folded(tmp34, funcIdent, lambda)
                     };
+                    op = op1;
                     if (choiceTree instanceof Tree.Bracketed.class) {
                       param05 = choiceTree.kind;
                       param14 = choiceTree.tree;
@@ -441,65 +446,62 @@ Extension1 = class Extension {
                         }
                       } else {
                         tmp7 = Tree.summary(choiceTree);
-                        tmp8 = "Expect the choiceTree to be a bracketed term but found " + tmp7;
-                        tmp9 = Predef.print(tmp8);
+                        tmp8 = Predef.print("Expect the choiceTree to be a bracketed term but found", tmp7);
                         return Option.None
                       }
                     } else {
-                      tmp10 = Tree.summary(choiceTree);
-                      tmp11 = "Expect the choiceTree to be a bracketed term but found " + tmp10;
-                      tmp12 = Predef.print(tmp11);
+                      tmp9 = Tree.summary(choiceTree);
+                      tmp10 = Predef.print("Expect the choiceTree to be a bracketed term but found", tmp9);
                       return Option.None
                     }
                   } else {
-                    tmp13 = Tree.summary(choiceTree);
-                    tmp14 = "Expect the choiceTree to be a bracketed term but found " + tmp13;
-                    tmp15 = Predef.print(tmp14);
+                    tmp11 = Tree.summary(choiceTree);
+                    tmp12 = Predef.print("Expect the choiceTree to be a bracketed term but found", tmp11);
                     return Option.None
                   }
                 } else {
-                  tmp16 = Tree.summary(categoryIdent);
-                  tmp17 = "Expect a the category to be an identifier but found " + tmp16;
-                  tmp18 = Predef.print(tmp17);
+                  tmp13 = Tree.summary(categoryIdent);
+                  tmp14 = "Expect a the category to be an identifier but found " + tmp13;
+                  tmp15 = Predef.print(tmp14);
                   return Option.None
                 }
               } else {
-                tmp19 = Tree.summary(categoryIdent);
-                tmp20 = "Expect a the category to be an identifier but found " + tmp19;
-                tmp21 = Predef.print(tmp20);
+                tmp16 = Tree.summary(categoryIdent);
+                tmp17 = "Expect a the category to be an identifier but found " + tmp16;
+                tmp18 = Predef.print(tmp17);
                 return Option.None
               }
             } else {
-              tmp22 = Tree.summary(tree4);
-              tmp23 = "Expect the definition to be a tuple but found " + tmp22;
-              tmp24 = Predef.print(tmp23);
+              tmp19 = Tree.summary(tree4);
+              tmp20 = "Expect the definition to be a tuple but found " + tmp19;
+              tmp21 = Predef.print(tmp20);
               return Option.None
             }
           } else {
-            tmp25 = Tree.summary(tree4);
-            tmp26 = "Expect the definition to be a tuple but found " + tmp25;
-            tmp27 = Predef.print(tmp26);
+            tmp22 = Tree.summary(tree4);
+            tmp23 = "Expect the definition to be a tuple but found " + tmp22;
+            tmp24 = Predef.print(tmp23);
             return Option.None
           }
         } else {
-          tmp28 = Tree.summary(tree4);
-          tmp29 = "Expect the definition to be a tuple but found " + tmp28;
-          tmp30 = Predef.print(tmp29);
+          tmp25 = Tree.summary(tree4);
+          tmp26 = "Expect the definition to be a tuple but found " + tmp25;
+          tmp27 = Predef.print(tmp26);
           return Option.None
         }
       } else {
-        tmp31 = Tree.summary(tree4);
-        tmp32 = "Expect the definition to be a tuple but found " + tmp31;
-        tmp33 = Predef.print(tmp32);
+        tmp28 = Tree.summary(tree4);
+        tmp29 = "Expect the definition to be a tuple but found " + tmp28;
+        tmp30 = Predef.print(tmp29);
         return Option.None
       }
     } else {
-      tmp34 = Tree.summary(tree4);
-      tmp35 = "Expect the definition to be a tuple but found " + tmp34;
-      tmp36 = Predef.print(tmp35);
+      tmp31 = Tree.summary(tree4);
+      tmp32 = "Expect the definition to be a tuple but found " + tmp31;
+      tmp33 = Predef.print(tmp32);
       return Option.None
     }
   }
   static toString() { return "Extension"; }
-};
+});
 let Extension = Extension1; export default Extension;

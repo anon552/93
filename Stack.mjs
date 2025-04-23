@@ -1,15 +1,18 @@
 import runtime from "./Runtime.mjs";
 import Predef from "./Predef.mjs";
 let Stack1;
-Stack1 = class Stack {
+(class Stack {
   static {
-    this.Cons = function Cons(head1, tail1) { return new Cons.class(head1, tail1); };
+    Stack1 = Stack;
+    this.Cons = function Cons(head1, tail1) {
+      return new Cons.class(head1, tail1);
+    };
     this.Cons.class = class Cons {
       constructor(head, tail) {
         this.head = head;
         this.tail = tail;
       }
-      toString() { return "Cons(" + globalThis.Predef.render(this.head) + ", " + globalThis.Predef.render(this.tail) + ")"; }
+      toString() { return "Cons(" + runtime.render(this.head) + ", " + runtime.render(this.tail) + ")"; }
     };
     const Nil$class = class Nil {
       constructor() {}
@@ -89,7 +92,8 @@ Stack1 = class Stack {
   static zip(...xss) {
     let go, tmp, tmp1;
     go = function go(heads, tails) {
-      return (caseScrut) => {
+      let lambda;
+      lambda = (undefined, function (caseScrut) {
         let param0, param1, h, t, param01, param11, h2, t2, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
         if (caseScrut instanceof Stack.Cons.class) {
           param0 = caseScrut.head;
@@ -130,7 +134,8 @@ Stack1 = class Stack {
         } else {
           throw new globalThis.Error("match error");
         }
-      }
+      });
+      return lambda
     };
     tmp = go(Stack.Nil, Stack.Nil);
     tmp1 = Stack.fromArray(xss);
@@ -181,11 +186,44 @@ Stack1 = class Stack {
     tmp = Stack.Cons(y, Stack.Nil);
     return Stack.concat(xs5, tmp)
   } 
-  static filter(xs6, f) {
-    let param0, param1, head, tail1, scrut, tmp;
-    if (xs6 instanceof Stack.Cons.class) {
+  static rev(xs6) {
+    let param0, param1, h, t, res, rem, param01, param11, h$_, t$_, tmp, tmp1, tmp2;
+    if (xs6 instanceof Stack.Nil.class) {
+      return Stack.Nil
+    } else if (xs6 instanceof Stack.Cons.class) {
       param0 = xs6.head;
       param1 = xs6.tail;
+      h = param0;
+      t = param1;
+      tmp = Stack.Cons(h, Stack.Nil);
+      res = tmp;
+      rem = t;
+      tmp3: while (true) {
+        if (rem instanceof Stack.Cons.class) {
+          param01 = rem.head;
+          param11 = rem.tail;
+          h$_ = param01;
+          t$_ = param11;
+          tmp1 = Stack.Cons(h$_, res);
+          res = tmp1;
+          rem = t$_;
+          tmp2 = runtime.Unit;
+          continue tmp3;
+        } else {
+          tmp2 = runtime.Unit;
+        }
+        break;
+      }
+      return res
+    } else {
+      throw new globalThis.Error("match error");
+    }
+  } 
+  static filter(xs7, f) {
+    let param0, param1, head, tail1, scrut, tmp;
+    if (xs7 instanceof Stack.Cons.class) {
+      param0 = xs7.head;
+      param1 = xs7.tail;
       head = param0;
       tail1 = param1;
       scrut = runtime.safeCall(f(head));
@@ -195,12 +233,12 @@ Stack1 = class Stack {
       } else {
         return Stack.filter(tail1, f)
       }
-    } else if (xs6 instanceof Stack.Nil.class) {
+    } else if (xs7 instanceof Stack.Nil.class) {
       return Stack.Nil
     } else {
       throw new globalThis.Error("match error");
     }
   }
   static toString() { return "Stack"; }
-};
+});
 let Stack = Stack1; export default Stack;
